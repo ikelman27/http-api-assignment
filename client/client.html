@@ -1,14 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
 
+    const handleResponse = (xhr, parseResponse) => {
+      const content = document.querySelector('#content');
+      const type = xhr.getResponseHeader('content-type');
+
+
+      
+      switch(xhr.status) {
+        case 200: 
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 400: 
+          content.innerHTML = `<b>Bad Request</b> <p> missing Queery paramiter valid</p>`;
+          break;
+
+        case 401:
+          content.innerHTML = `<b>Unotorized</b> <p> missing Queery paramiter loggedIn</p>`
+        break;
+
+        case 403: 
+          content.innerHTML = `<b>Forbiden</b>`;
+          break;
+
+        case 403: 
+          content.innerHTML = `<b>Unauthorized</b>`;
+          break;
+
+        case 500: 
+          content.innerHTML = `<b>Forbiden</b>`;
+          break;
+        case 404: 
+          content.innerHTML = `<b>Resource Not Found</b>`;
+          break;
+        default: 
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      
+        }
+       
+      
+      if(type === 'application/json') {
+
+    
+        if(parseResponse) {
+   
+          const obj = JSON.parse(xhr.response);
+          console.dir(obj);
+        }
+        else {
+          console.log('received');
+        }
+
+      }
+      else if (type === 'text/xml') {
+        console.dir( xhr.response);
+      }
+
+    };
+
+   
+    const requestUpdate = (e, userForm) => {
+      
+      
+     
+      const type = document.querySelector('#type').value;
+      const url = userForm.value;
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+
+    if(type === 'application/json') {
+
+        xhr.setRequestHeader('Accept', 'application/json');
+
+    }
+    else if (type === 'text/xml') {
+      xhr.setRequestHeader('Accept', 'text/xml');
+    }
+        
+      xhr.onload = () => handleResponse(xhr, true);
+      
+      //send ajax request
+      xhr.send();
+      
+      //cancel browser's default action
+      e.preventDefault();
+      //return false to prevent page redirection from a form
+      return false;
+    };
+
+    const init = () => {
+      //grab form
+      const page = document.querySelector('#page');
+      
+      //function to handle our request
+      const getUsers = (e) => requestUpdate(e, page);
+      
+      //add event listener
+      document.querySelector('#send').addEventListener('click', getUsers);
+    };
+
+    window.onload = init;
+
+
+
   </script>
 </head>
+
 <body>
   <section id="top">
     <h3>Status Code Tests</h3>
@@ -28,6 +133,8 @@
     <button id="send">Send</button>
   </section>
   <section id="content">
+
   </section>
 </body>
+
 </html>
